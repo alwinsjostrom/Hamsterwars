@@ -50,7 +50,7 @@ router.get('/:id', async (req, res) => {
 //Lägg till ett nytt hamsterobjekt
 router.post('/', (req, res) => {
     //Vid felaktig body
-    if (!isUserObj(req.body)) {
+    if (!isHamsterObj(req.body)) {
         res.status(400).send('Must be a valid user object')
         return
     }
@@ -70,8 +70,6 @@ router.post('/', (req, res) => {
 router.put('/:id', async (req, res) => {
     const docRef = db.collection(HAMSTERS).doc(req.params.id)
     const docSnapshot = await docRef.get()
-
-    //Kolla att objektet enbart innehåller existerande fields
     let keys = Object.keys(req.body)
 
     //Kolla att man inte skickar in ett tomt objekt som body
@@ -95,6 +93,7 @@ router.put('/:id', async (req, res) => {
         return
     }
 
+    //Om man skickar in ett felaktigt id
     res.sendStatus(404)
 })
 
@@ -105,16 +104,17 @@ router.delete('/:id', async (req, res) => {
 
     //Kolla om det angivna id:t existerar
     if (docSnapshot.exists) {
-        await db.collection(HAMSTERS).doc(req.params.id).delete()
+        await docRef.delete()
         res.sendStatus(200)
         return
     }
 
+    //Om man skickar in ett felaktigt id
     res.sendStatus(404)
 })
 
 //Kolla att ett objekt är i korrekt format
-function isUserObj(maybeObj) {
+function isHamsterObj(maybeObj) {
     if ((typeof maybeObj) !== 'object') {
         return false
     }
